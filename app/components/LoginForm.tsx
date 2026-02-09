@@ -8,7 +8,7 @@ export default function LoginForm() {
     const[username, setUsername] = useState<string>("");
     const[password, setPassword] = useState<string>("");
     const[errorText, setErrorText] = useState<string>("");
-    const[vulnerable, setVulnerable] = useState<boolean>(false);
+    const[vulnerable, setVulnerable] = useState<boolean>(true);
     const[error, setError] = useState<boolean>(false);
     const router = useRouter();
 
@@ -22,7 +22,7 @@ export default function LoginForm() {
 
         
         let response: any = await sendJSONData(`/api/login/${vulnerable ? 'vulnerable' : 'hardened'}`, loginJson, "POST");
-        
+        console.log(response.data.query)
         if (response.data.error) {
             setErrorText(response.data.error);
             setError(true);

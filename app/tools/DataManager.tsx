@@ -18,8 +18,7 @@ export async function vulnerableQuery(request: NextRequest) {
   let username = body.username;
   let password = body.password;
   
-  // construct a rawdogged query,
-  // its typically recommended to use query parameters here as inserting user inputs directly into a query string leads to bad news, as you'll see
+  // this time we'll 
   const unsafeQuery = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'
   ;`;
   
@@ -27,21 +26,49 @@ export async function vulnerableQuery(request: NextRequest) {
   try{
   const result: any = await client.query(unsafeQuery);
   
+    // if the query returns something, welcome the user and give the okay status
     if (result.rows.length) {
-      return NextResponse.json({ message: `Welcome ${username}`}, {status:200});
-    }else {
-      return NextResponse.json({ error: 'Invalid credentials' }, {status: 406});
+      return NextResponse.json({ message: `Welcome ${username}`, query: unsafeQuery }, {status:200});
+    // else, give invalid credentials
+    } else {
+      return NextResponse.json({ error: 'Invalid credentials', query: unsafeQuery }, {status: 406});
     }
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message });
   } finally {
     client.end();
   }
-  
-  
-  
 };
 
 export async function hardenedQuery(request: NextRequest) {
+ const client = new Client(CONNECTION_STRING)
+  // open database connection
+  await client.connect()
+  
+  // grab the information from the json response
+  const body:any = await request.json();
 
+  let username: string = body.username;
+  let password: string = body.password;
+  
+  // this is a parameterized query
+  const safeQuery = 'SELECT * FROM users WHERE username = $1 AND password = $2';
+
+  // set the value array
+  let values: string[] = [username, password];
+  
+  // get the result
+  try{
+  const result: any = await client.query(safeQuery, values);
+  
+    if (result.rows.length) {
+      return NextResponse.json({ message: `Welcome ${username}`}, {status:200});
+    }else {
+      return NextResponse.json({ error: 'Invalid credentials', query: safeQuery }, {status: 406});
+    }
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message });
+  } finally {
+    client.end();
+  }
 }
