@@ -114,14 +114,19 @@ export async function submitCommentVulnerable(request: NextRequest) {
   let comment: string = body.comment;
 
   const insertQuery = 'INSERT INTO comments(username, comment) VALUES($1, $2)';
+  // query to refresh the comments
+  const commentQuery = `SELECT * FROM comments;`;
 
   // set the value array
   let values: string[] = [username, comment];
 
-  // try to insert the comments
+  // try to insert the comments and refresh the comments
   try {
     const result: any = await client.query(insertQuery, values);
-    let comments: any = result.rows;
+
+    // grab the latest comments and send them back as json
+    const refreshComments: any = await client.query(commentQuery);
+    let comments: any = refreshComments.rows;
 
     (result.rows.length)
     return NextResponse.json({ comments: comments, result: result }, { status: 200 });
@@ -147,13 +152,19 @@ export async function submitCommentHardened(request: NextRequest) {
 
   const insertQuery = 'INSERT INTO comments(username, comment) VALUES($1, $2)';
 
+  // query to refresh the comments
+  const commentQuery = `SELECT * FROM comments;`;
+
   // set the value array
   let values: string[] = [username, comment];
 
   // try to insert the comments
   try {
     const result: any = await client.query(insertQuery, values);
-    let comments: any = result.rows;
+
+    // grab the latest comments and send them back as json
+    const refreshComments: any = await client.query(commentQuery);
+    let comments: any = refreshComments.rows;
 
     (result.rows.length)
     return NextResponse.json({ comments: comments, result: result }, { status: 200 });

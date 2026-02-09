@@ -5,6 +5,8 @@ import { Comments, Comment } from "./data.model";
 import { sendJSONData } from "./Toolkit";
 import Image from "next/image";
 
+export const dynamic = "force-dynamic";
+
 // vulnerable version
 export default function CommentBox(commentArray: Comments) {
   const [comments, setComments] = useState<Comment[]>(commentArray.comments);
@@ -14,12 +16,15 @@ export default function CommentBox(commentArray: Comments) {
   const [vulnerableRoute, setVulnerableRoute] = useState<boolean>(true);
 
   const onCommentSubmit = async () => {
-    let commentJson = { "username": username, "comment": comment }
+    if (username.length && comment.length) {
+      let commentJson = { "username": username, "comment": comment }
 
 
-    let response: any = await sendJSONData(`/api/comments/submit/${vulnerableRoute ? 'vulnerable' : 'hardened'}`, commentJson, "POST");
-    console.log(commentJson)
+      let response: any = await sendJSONData(`/api/comments/submit/${vulnerableRoute ? 'vulnerable' : 'hardened'}`, commentJson, "POST");
+      console.log(commentJson)
 
+      setComments(response.data.comments)
+    }
   }
 
 
