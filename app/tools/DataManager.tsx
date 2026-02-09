@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 // set up and define the postgres db connection
 import { Client } from 'pg';
+import sanitizeHtml from "sanitize-html";
+
 const CONNECTION_STRING = {
   user: 'user',
   password: 'password',
@@ -97,5 +99,68 @@ export async function getComments() {
     client.end();
   }
 
+
+}
+
+export async function submitCommentVulnerable(request: NextRequest) {
+  const client = new Client(CONNECTION_STRING)
+  // open database connection
+  await client.connect()
+
+  // grab the information from the json response
+  const body: any = await request.json();
+
+  let username: string = body.username;
+  let comment: string = body.comment;
+
+  const insertQuery = 'INSERT INTO comments(username, comment) VALUES($1, $2)';
+
+  // set the value array
+  let values: string[] = [username, comment];
+
+  // try to insert the comments
+  try {
+    const result: any = await client.query(insertQuery, values);
+    let comments: any = result.rows;
+
+    (result.rows.length)
+    return NextResponse.json({ comments: comments, result: result }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message });
+  } finally {
+    client.end();
+  }
+
+}
+
+export async function submitCommentHardened(request: NextRequest) {
+  const client = new Client(CONNECTION_STRING)
+  // open database connection
+  await client.connect()
+
+  // grab the information from the json response
+  const body: any = await request.json();
+
+  // the key take away here is santization
+  let username: string = sanitizeHtml(body.username);
+  let comment: string = sanitizeHtml(body.comment);
+
+  const insertQuery = 'INSERT INTO comments(username, comment) VALUES($1, $2)';
+
+  // set the value array
+  let values: string[] = [username, comment];
+
+  // try to insert the comments
+  try {
+    const result: any = await client.query(insertQuery, values);
+    let comments: any = result.rows;
+
+    (result.rows.length)
+    return NextResponse.json({ comments: comments, result: result }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message });
+  } finally {
+    client.end();
+  }
 
 }

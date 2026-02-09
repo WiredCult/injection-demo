@@ -1,5 +1,5 @@
 import CommentBox from "../tools/CommentBox";
-import { Comments } from "../tools/data.model";
+import { Comments, Comment } from "../tools/data.model";
 import { getJSONData } from "../tools/Toolkit";
 
 export default async function corn() {
@@ -10,12 +10,9 @@ export default async function corn() {
     let data: any = await getJSONData(CONNECTION_SCRIPT);
     console.log(data)
 
-    let comments: Comments = data.comments;
+    let comments: Comment[] = data.comments;
 
     return (
-        <> Welcome to cornhub!
-            <CommentBox comments={comments} />
-        </>
-
+        <CommentBox comments={comments} />
     )
 }

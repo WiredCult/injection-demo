@@ -1,146 +1,106 @@
-// // components/CommentBox.tsx
-// 'use client'; // <-- required for client‑side interactivity in Next 13+
-
-// import { useEffect, useState } from 'react';
-
-// type Comment = {
-//   id: string;
-//   html: string;
-// };
-
-// export default function CommentBox() {
-//   const STORAGE_KEY = 'my-comments';
-
-//   // -----------------------------------------------------------------
-//   // 1️⃣ Load comments from localStorage (or fall back to sample data)
-//   // -----------------------------------------------------------------
-//   const sampleComments: Comment[] = [
-//     {
-//       id: 'c1',
-//       html: '<p><strong>Alice:</strong> I love <em>Next.js</em>! 🚀</p>',
-//     },
-//     {
-//       id: 'c2',
-//       html: '<p><strong>Bob:</strong> Check out <a href="https://proton.me">Proton</a> – great privacy tools.</p>',
-//     },
-//     {
-//       id: 'c3',
-//       html: '<p><strong>Carol:</strong> <script>alert("XSS demo");</script></p>', // intentional raw‑HTML demo
-//     },
-//   ];
-
-//   const [comments, setComments] = useState<Comment[]>([]);
-//   const [newComment, setNewComment] = useState<string>('');
-
-//   // Load once on mount
-//   useEffect(() => {
-//     const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-//     if (stored) {
-//       try {
-//         setComments(JSON.parse(stored));
-//       } catch {
-//         // If parsing fails, fall back to samples
-//         setComments(sampleComments);
-//       }
-//     } else {
-//       setComments(sampleComments);
-//     }
-//   }, []);
-
-//   // -----------------------------------------------------------------
-//   // 2️⃣ Helper: persist the whole comment array to localStorage
-//   // -----------------------------------------------------------------
-//   const persist = (list: Comment[]) => {
-//     if (typeof window !== 'undefined') {
-//       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-//     }
-//   };
-
-//   // -----------------------------------------------------------------
-//   // 3️⃣ Add a new comment (raw HTML string)
-//   // -----------------------------------------------------------------
-//   const addComment = () => {
-//     if (!newComment.trim()) return;
-
-//     const newEntry: Comment = {
-//       id: crypto.randomUUID(),
-//       html: newComment,
-//     };
-//     const updated = [...comments, newEntry];
-//     setComments(updated);
-//     persist(updated);
-//     setNewComment(''); // clear textarea
-//   };
-
-//   // -----------------------------------------------------------------
-//   // 4️⃣ Render UI
-//   // -----------------------------------------------------------------
-//   return (
-//     <section style={{ maxWidth: '600px', margin: 'auto', padding: '1rem' }}>
-//       <h2>Comments</h2>
-
-//       {/* Existing comments */}
-//       <ul style={{ listStyle: 'none', padding: 0 }}>
-//         {comments.map((c) => (
-//           <li
-//             key={c.id}
-//             style={{
-//               border: '1px solid #ddd',
-//               borderRadius: '4px',
-//               padding: '0.75rem',
-//               marginBottom: '0.5rem',
-//             }}
-//             // Render raw HTML (dangerous!)
-//             dangerouslySetInnerHTML={{ __html: c.html }}
-//           />
-//         ))}
-//       </ul>
-
-//       {/* New comment form */}
-//       <div style={{ marginTop: '1rem' }}>
-//         <textarea
-//           rows={4}
-//           placeholder="Write raw HTML here…"
-//           value={newComment}
-//           onChange={(e) => setNewComment(e.target.value)}
-//           style={{ width: '100%', fontFamily: 'monospace', padding: '0.5rem' }}
-//         />
-//         <button
-//           onClick={addComment}
-//           style={{
-//             marginTop: '0.5rem',
-//             padding: '0.5rem 1rem',
-//             backgroundColor: '#0066ff',
-//             color: '#fff',
-//             border: 'none',
-//             borderRadius: '4px',
-//             cursor: 'pointer',
-//           }}
-//         >
-//           Add comment
-//         </button>
-//       </div>
-//     </section>
-//   );
-// }
 "use client"
 
 import { useState } from "react";
 import { Comments, Comment } from "./data.model";
+import { sendJSONData } from "./Toolkit";
+import Image from "next/image";
 
+// vulnerable version
 export default function CommentBox(commentArray: Comments) {
-  const [comments, setcomments] = useState<Comment[]>(commentArray.comments);
+  const [comments, setComments] = useState<Comment[]>(commentArray.comments);
+  const [vulnerable, setVulnerable] = useState<boolean>(true);
+  const [username, setUsername] = useState<string>("");
+  const [comment, setComment] = useState<string>("");
+  const [vulnerableRoute, setVulnerableRoute] = useState<boolean>(true);
 
+  const onCommentSubmit = async () => {
+    let commentJson = { "username": username, "comment": comment }
+
+
+    let response: any = await sendJSONData(`/api/comments/submit/${vulnerableRoute ? 'vulnerable' : 'hardened'}`, commentJson, "POST");
+    console.log(commentJson)
+
+  }
 
 
   return (
-    <div>
-      {comments.map(comment => (
-        <div key={comment.id}>
-          <div id="username">{comment.username}</div>
-          <div id="comment">{comment.comment}</div>
+    <div className="flex align-center justify-center mt-5 mb-5">
+
+      <div className="flex flex-col items-center gap-5">
+        <Image
+          src={"/images/chub.png"}
+          alt={"got corn??"}
+          width={200}
+          height={150}
+        />
+
+        <div className="relative w-100 h-100">
+          <Image
+            src={vulnerable ? ('/images/cornUnsafe.png') : ('/images/cornSafe.png')}
+            alt={vulnerable ? ('corn') : ('safecorn')}
+            fill={true}
+          />
         </div>
-      ))}
+
+        {vulnerable ? (
+          <div>
+            {/* vulnerable method:
+
+          this method sets the inner html of each element to be the respective string. In doing this, we render the string as html, which is very dangerous (as implied by reacts renaming of the "setInnerHtml" function)
+          */}
+            <div className="flex flex-col max-w-2xl gap-4 bg-gray-500 rounded pb-2">
+              {comments.map(comment => (
+                <div key={comment.id} className="flex flex-col gap-2">
+                  <div id="username" dangerouslySetInnerHTML={{ __html: comment.username }} className="bg-amber-500 p-2 text-black"></div>
+                  <div id="comment" dangerouslySetInnerHTML={{ __html: comment.comment }} className="pl-2"></div>
+                </div>
+              ))}
+            </div>
+
+            {/* hardened method:
+
+            this method displays the respective comments strings as strings, and not html.
+
+          */}
+          </div>) : (<div className="flex flex-col max-w-2xl gap-4 bg-gray-500 rounded pb-2">
+            {comments.map(comment => (
+              <div key={comment.id} className="flex flex-col gap-2">
+                <div id="username" className="bg-amber-500 p-2 text-black">{comment.username}</div>
+                <div id="comment" className="pl-2">{comment.comment}</div>
+              </div>
+            ))}
+          </div>)
+        }
+
+        <div className="display flex flex-col text-center gap-2">
+          {/* comment form */}
+          <p> Like what you see, farmer? Leave a comment:</p>
+          <label htmlFor="comment-username"> Display name</label>
+          <input type="text" id="comment-username" onChange={(e) => setUsername(e.target.value)} className="bg-white text-black rounded p-1"></input>
+          <label htmlFor="comment-text"> Comment</label>
+          <textarea id="comment-text" onChange={(e) => setComment(e.target.value)} className="bg-white text-black rounded p-1"></textarea>
+        </div>
+
+        {/* display the current mode */}
+        <p className={`${vulnerable ? 'text-red-600' : 'text-green-500'}`}>Current display mode: {vulnerable ? 'unsafe' : 'safe'}</p>
+
+        {/* display the current route */}
+        <p className={`${vulnerableRoute ? 'text-red-600' : 'text-green-500'}`}>Current route: {vulnerableRoute ? 'vulnerable' : 'hardened'}</p>
+
+        {/* button container */}
+        <div className="flex flex-col gap-5">
+
+          <button className="bg-orange-500 p-3 rounded-2xl text-black" onClick={onCommentSubmit}> Submit </button>
+
+          <div className="flex flex-row gap-2">
+            <button className="bg-orange-500 p-3 rounded-2xl text-black" onClick={(e) => setVulnerable(!vulnerable)}> Switch display mode </button>
+
+            <button className="bg-orange-500 p-3 rounded-2xl text-black" onClick={(e) => setVulnerableRoute(!vulnerableRoute)}> Switch route </button>
+          </div>
+
+        </div>
+      </div>
     </div>
+
   )
 }
