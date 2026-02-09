@@ -1,37 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 // set up and define the postgres db connection
 import { Client } from 'pg';
-const CONNECTION_STRING = {   user: 'user',
+const CONNECTION_STRING = {
+  user: 'user',
   password: 'password',
   host: 'postgres',
   port: 5432,
-  database: 'db',}
+  database: 'db',
+}
 
 export async function vulnerableQuery(request: NextRequest) {
   const client = new Client(CONNECTION_STRING)
   // open database connection
   await client.connect()
-  
+
   // grab the information from the json response
-  const body:any = await request.json();
+  const body: any = await request.json();
   // we aren't going to sanitize it, as per the demo
   let username = body.username;
   let password = body.password;
-  
+
   // this time we'll 
   const unsafeQuery = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'
   ;`;
-  
+
   // get the result
-  try{
-  const result: any = await client.query(unsafeQuery);
-  
+  try {
+    const result: any = await client.query(unsafeQuery);
+
     // if the query returns something, welcome the user and give the okay status
     if (result.rows.length) {
-      return NextResponse.json({ message: `Welcome ${username}`, query: unsafeQuery }, {status:200});
-    // else, give invalid credentials
+      return NextResponse.json({ message: `Welcome ${username}`, query: unsafeQuery }, { status: 200 });
+      // else, give invalid credentials
     } else {
-      return NextResponse.json({ error: 'Invalid credentials', query: unsafeQuery }, {status: 406});
+      return NextResponse.json({ error: 'Invalid credentials', query: unsafeQuery }, { status: 406 });
     }
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message });
@@ -41,34 +43,59 @@ export async function vulnerableQuery(request: NextRequest) {
 };
 
 export async function hardenedQuery(request: NextRequest) {
- const client = new Client(CONNECTION_STRING)
+  const client = new Client(CONNECTION_STRING)
   // open database connection
   await client.connect()
-  
+
   // grab the information from the json response
-  const body:any = await request.json();
+  const body: any = await request.json();
 
   let username: string = body.username;
   let password: string = body.password;
-  
+
   // this is a parameterized query
   const safeQuery = 'SELECT * FROM users WHERE username = $1 AND password = $2';
 
   // set the value array
   let values: string[] = [username, password];
-  
+
   // get the result
-  try{
-  const result: any = await client.query(safeQuery, values);
-  
+  try {
+    const result: any = await client.query(safeQuery, values);
+
     if (result.rows.length) {
-      return NextResponse.json({ message: `Welcome ${username}`}, {status:200});
-    }else {
-      return NextResponse.json({ error: 'Invalid credentials', query: safeQuery }, {status: 406});
+      return NextResponse.json({ message: `Welcome ${username}` }, { status: 200 });
+    } else {
+      return NextResponse.json({ error: 'Invalid credentials', query: safeQuery }, { status: 406 });
     }
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message });
   } finally {
     client.end();
   }
+}
+
+export async function getComments() {
+  const client = new Client(CONNECTION_STRING)
+  // open database connection
+  await client.connect();
+
+  const commentQuery = `SELECT * FROM comments;`;
+  try {
+
+    const result: any = await client.query(commentQuery);
+    let comments: any = result.rows;
+
+    if (result.rows.length) {
+      return NextResponse.json({ comments: comments }, { status: 200 });
+    } else {
+      return NextResponse.json({ error: 'No comments found' }, { status: 406 });
+    }
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message });
+  } finally {
+    client.end();
+  }
+
+
 }

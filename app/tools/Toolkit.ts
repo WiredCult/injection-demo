@@ -2,8 +2,8 @@
 // arguments :
 // low : number - the lowest number in the range
 // high : number - the highest number in the range
-export function getRandom(low:number=1, high:number=10) {
-    let randomNumber:number;
+export function getRandom(low: number = 1, high: number = 10) {
+    let randomNumber: number;
     // calculate random number
     randomNumber = Math.round(Math.random() * (high - low)) + low;
     // returning value
@@ -14,8 +14,8 @@ export function getRandom(low:number=1, high:number=10) {
 // arguments :
 // functionToCall : function - the function to call when the key is pressed
 // keyToDetect : string - the key to detect
-export function addKey(functionToCall:Function, keyToDetect:string = "Enter") {
-    document.addEventListener("keydown", (e:KeyboardEvent) => {
+export function addKey(functionToCall: Function, keyToDetect: string = "Enter") {
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
 
         console.log("Key down: " + e.code);
 
@@ -37,17 +37,17 @@ export function addKey(functionToCall:Function, keyToDetect:string = "Enter") {
 // imageFilenames : array - the array of image filenames to load
 // path : string - the path to the images in the project folder
 // callback : function - the function to call when all images are loaded (optional)
-let loadedCount:number, images:HTMLImageElement[];
-export function cacheImages(imageFilenames:string[], path:string, callback:Function) {
+let loadedCount: number, images: HTMLImageElement[];
+export function cacheImages(imageFilenames: string[], path: string, callback: Function) {
     // initialization
     loadedCount = 0;
     images = [];
-    
+
     // loop through array of image filenames
     for (let filename of imageFilenames) {
         // construct Image object and listen for when loaded
-        let image:HTMLImageElement = new Image();
-        image.addEventListener("load", (e:Event) => {
+        let image: HTMLImageElement = new Image();
+        image.addEventListener("load", (e: Event) => {
             loadedCount++;
             if (loadedCount >= imageFilenames.length) {
                 if (callback) callback();
@@ -62,15 +62,15 @@ export function cacheImages(imageFilenames:string[], path:string, callback:Funct
 // pauses execution for a set amount of time (in milliseconds) for testing loading overlays, etc.
 // arguments :
 // seconds : number - the number of seconds to pause execution for
-export async function pauser(seconds:number) {
+export async function pauser(seconds: number) {
     await new Promise(resolve => setTimeout(resolve, 1000 * seconds));
 }
 
 // dumps JSON data to the console for testing purposes
 // arguments :
 // data : any - the JSON data to dump
-export function jsondump(data:any) {
-    console.log(JSON.stringify(data, null, "\t")); 
+export function jsondump(data: any) {
+    console.log(JSON.stringify(data, null, "\t"));
 }
 
 // retrieves JSON data from a URL and runs a function when the data is retrieved, passing along the JSON data as an argument
@@ -78,12 +78,12 @@ export function jsondump(data:any) {
 // retrieveURL : string - the URL to retrieve the JSON data from
 // cacheExpiry : number|false - amount of time in seconds until the cached data becomes stale and needs to be re-fetched from data source. Set to 10 minutes by default. Set to 0 to disable caching. Set to false to disable caching and have data fetched once at build time. Only applies to server components - client components this is ignored
 // debug : boolean - whether to throw an error if one occurs (default is set to true)
-export async function getJSONData(retrieveScript:string, cacheExpiry:number|false = 600, debug:boolean = true) {
+export async function getJSONData(retrieveScript: string, cacheExpiry: number | false = 600, debug: boolean = true) {
     try {
-        const response:Response = await fetch(retrieveScript, { next: { revalidate: cacheExpiry }});
-        const data:any = await response.json();
+        const response: Response = await fetch(retrieveScript, { next: { revalidate: cacheExpiry } });
+        const data: any = await response.json();
         return data;
-    } catch (error:any) {
+    } catch (error: any) {
         console.log(`>>> FETCH ERROR: ${error.message}`);
         if (debug) throw error;
         return null;
@@ -96,17 +96,17 @@ export async function getJSONData(retrieveScript:string, cacheExpiry:number|fals
 // sendJSON : object - the JSON data to send
 // requestType : string - the type of HTTP request to make (default is "POST")
 // debug : boolean - whether to throw an error if one occurs (default is set to true)
-export async function sendJSONData(sendURL: string, sendJSON: any, requestType:string = "POST", debug: boolean = true) {
+export async function sendJSONData(sendURL: string, sendJSON: any, requestType: string = "POST", debug: boolean = true) {
     try {
-        const response:Response = await fetch(sendURL, {
+        const response: Response = await fetch(sendURL, {
             method: requestType,
             headers: { "content-type": "application/json" },
             body: JSON.stringify(sendJSON),
             cache: 'no-store'
         });
-        const responseData:any = await response.json();
-        return {data:responseData, status:response.status};
-    } catch (error:any) {
+        const responseData: any = await response.json();
+        return { data: responseData, status: response.status };
+    } catch (error: any) {
         console.log(`>>> FETCH ERROR: ${error.message}`);
         if (debug) throw error;
         return null;
