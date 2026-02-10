@@ -1,6 +1,6 @@
 # 🚩 Injection Demo! 🐈
 
-An intentionally vulnerable web application written Next.Js and using Postgresql for it's database.
+An intentionally vulnerable web application written in Next.Js with Postgresql for its database.
 
 You can spin up the app using the docker compose file, and access it at `localhost:3000`.
 
