@@ -1,0 +1,5 @@
+pay attention to where you're input shows up in the query.
+
+what can you do from your current position within it?
+
+remember that postgres uses "--" (without the quotes around it) to indicate that everything AFTER those two dashes is a comment and *should not be interpreted or executed*

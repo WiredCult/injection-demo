@@ -1,0 +1,9 @@
+look into union attacks
+
+the UNION keyword is used to join one search query to another.
+
+SELECT * FROM table1 UNION SELECT * FROM table2;
+
+^ this selects every column in the table1, then the UNION keyword is used to ALSO select every column from table2
+
+https://portswigger.net/web-security/sql-injection/union-attacks
