@@ -1,4 +1,4 @@
-import CommentBox from "../tools/CommentBox";
+import CommentBox from "../components/CommentBox";
 import { Comments, Comment } from "../tools/data.model";
 import { getJSONData } from "../tools/Toolkit";
 

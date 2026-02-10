@@ -8,3 +8,12 @@ export interface Comment {
 export interface Comments {
     comments: Comment[];
 }
+
+export interface Corn {
+    id: number;
+    type: string;
+}
+
+export interface Corns {
+    corn: Corn[];
+}

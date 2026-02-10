@@ -166,10 +166,46 @@ export async function submitCommentHardened(request: NextRequest) {
     const refreshComments: any = await client.query(commentQuery);
     let comments: any = refreshComments.rows;
 
-    (result.rows.length)
     return NextResponse.json({ comments: comments, result: result }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message });
+  } finally {
+    client.end();
+  }
+
+}
+
+// the challenge route handler
+export async function submitSearch(request: NextRequest) {
+  const client = new Client(CONNECTION_STRING)
+  // open database connection
+  await client.connect()
+
+  // grab the information from the json response
+  const body: any = await request.json();
+  // we aren't going to sanitize it, as per the demo
+  let search = body.search;
+
+  const unsafeSearch =
+    `SELECT type FROM corn WHERE LOWER(type) LIKE '%' || LOWER('${search}') || '%';`;
+
+
+  try {
+    const result: any = await client.query(unsafeSearch);
+    if (result.rows.length > 0) {
+
+      return NextResponse.json(
+        { types: result.rows, query: unsafeSearch },
+        { status: 200 }
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Not found", query: unsafeSearch },
+        { status: 404 }
+      );
+    }
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message, query: unsafeSearch });
   } finally {
     client.end();
   }

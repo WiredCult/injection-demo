@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react";
-import { Comments, Comment } from "./data.model";
-import { sendJSONData } from "./Toolkit";
+import { Comments, Comment } from "../tools/data.model";
+import { sendJSONData } from "../tools/Toolkit";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
