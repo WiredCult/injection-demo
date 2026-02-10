@@ -44,4 +44,4 @@ INSERT INTO corn (type) VALUES
 ('Baby');
 
 INSERT INTO flag (flag) VALUES
-('Nice work!');
+('🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩');
